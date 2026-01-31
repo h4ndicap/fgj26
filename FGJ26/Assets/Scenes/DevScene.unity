@@ -132,6 +132,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2100000, guid: 6286599989412aa498398ab3e907c308, type: 2}
     - target: {fileID: 3522442757567688610, guid: b9791df29dd61ae44966adebb2a4db79, type: 3}
+      propertyPath: tileWallNorth.type
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3522442757567688610, guid: b9791df29dd61ae44966adebb2a4db79, type: 3}
       propertyPath: tileWallNorth.isWall
       value: 1
       objectReference: {fileID: 0}
