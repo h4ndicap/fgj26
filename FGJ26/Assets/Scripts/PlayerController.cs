@@ -19,6 +19,7 @@ namespace FGJ26
         public static PlayerController instance;
 
         private InputAction moveAction;
+        private InputAction endTurnAction;
 
         private Vector2 moveDirection;
 
@@ -27,6 +28,8 @@ namespace FGJ26
         public AnimationCurve rotationCurve;
 
         public AnimationCurve movementCurve;
+
+
 
         private float currentAnimationRotationY = 0f;
         private float rotationStartY = 0f;
@@ -60,21 +63,43 @@ namespace FGJ26
             get { return _currentActionPoints; }
             set
             {
+                bool changed = value != _currentActionPoints;
                 _currentActionPoints = value;
+                if (_currentActionPoints <= 0)
+                {
+                    // Debug.LogError("Out of action points!");
+                }
+                OnActionPointsChanged?.Invoke();
             }
         }
+        private int _currentActionPoints = 0;
+        public event Action OnActionPointsChanged;
 
         public int MovementCost { get { return _movementCost; } }
 
+        public bool IsOwnTurn
+        {
+            get
+            {
+                return _isOwnTurn;
+            }
+            set
+            {
+                _isOwnTurn = value;
+            }
+        }
+
+
+        private bool _isOwnTurn = false;
+
 
         [SerializeField]
-        private int _actionPoints = 5000;
+        private int _actionPoints = 5;
         [SerializeField]
         private int _movementCost = 2;
         [SerializeField]
         private int _turnCost = 1;
 
-        private int _currentActionPoints = 0;
 
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
@@ -89,14 +114,27 @@ namespace FGJ26
             }
             TurnControlSystem.instance.AddTurnControllable(this);
             moveAction = InputSystem.actions.FindAction("Move");
+            endTurnAction = InputSystem.actions.FindAction("EndTurn");
             CheckTile(gameObject.transform.position);
         }
 
         // Update is called once per frame
         void Update()
         {
+            if (!IsOwnTurn) return;
             moveDirection = moveAction.ReadValue<Vector2>();
+            bool turnEndInput = endTurnAction.triggered;
 
+
+            if (turnEndInput && !transformFired)
+            {
+                IsOwnTurn = false;
+                OnTurnEnded();
+                return;
+            }
+
+
+            // Debug.Log("updateloop" + turnEndInput + rotationFired + transformFired + HasEnoughActionPoints(ActionType.turn));
             if (moveDirection.x > 0 && !rotationFired && !transformFired && HasEnoughActionPoints(ActionType.turn))
             {
                 rotationStartY = rotationTargetY;
@@ -122,7 +160,7 @@ namespace FGJ26
                     movementTargetPosition = gameObject.transform.position + forwardDirection * movementStep;
                     movementFired = true;
                     transformFired = true;
-                    _currentActionPoints -= MovementCost;
+                    CurrentActionPoints -= MovementCost;
                 }
                 else
                 {
@@ -137,7 +175,7 @@ namespace FGJ26
                     movementTargetPosition = gameObject.transform.position - forwardDirection * movementStep;
                     movementFired = true;
                     transformFired = true;
-                    _currentActionPoints -= MovementCost;
+                    CurrentActionPoints -= MovementCost;
                 }
                 else
                 {
@@ -228,12 +266,13 @@ namespace FGJ26
 
         private bool HasEnoughActionPoints(ActionType action)
         {
+            // Debug.Log(action + _currentActionPoints);
             switch (action)
             {
                 case ActionType.move:
-                    return _currentActionPoints >= MovementCost;
+                    return CurrentActionPoints >= MovementCost;
                 case ActionType.turn:
-                    return _currentActionPoints >= _turnCost;
+                    return CurrentActionPoints >= _turnCost;
                 default:
                     return false;
             }
@@ -261,9 +300,10 @@ namespace FGJ26
 
         public void StartTurn()
         {
-            _currentActionPoints = MaxActionPoints;
+            CurrentActionPoints = MaxActionPoints;
             // OnTurnEnded();
-            Debug.Log("Starting player turn with AP:" + _currentActionPoints);
+            IsOwnTurn = true;
+            Debug.Log("Starting player turn with AP:" + CurrentActionPoints + IsOwnTurn);
         }
 
         public event Action OnTurnEnded;

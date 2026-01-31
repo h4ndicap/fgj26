@@ -7,8 +7,11 @@ public interface ITurnControllable
     public int MovementCost { get; }
 
     public int CurrentActionPoints { get; set; }
+
+    public bool IsOwnTurn { get; set; }
     void StartTurn();
     // void OnTurnEnd();
 
     public event Action OnTurnEnded;
+    public event Action OnActionPointsChanged;
 }

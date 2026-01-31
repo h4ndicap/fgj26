@@ -49,20 +49,32 @@ namespace FGJ26
 
         public void BeginRound()
         {
-            Debug.Log("Beginning turn" + roundCount);
+            Debug.Log("Beginning round" + roundCount + " with " + turnControllables.Count + " controllable entities");
             if (turnControllables.Count < 1)
             {
                 Debug.LogError("No controllables");
             }
             else
             {
-                turnControllables[0].StartTurn();
+                _currentTurnControllableIndex = 0;
+                turnControllables[_currentTurnControllableIndex].StartTurn();
             }
         }
 
         public void OnControllableTurnEnded()
         {
-            // Debug.Log("Endddd");
+            _currentTurnControllableIndex++;
+            if (_currentTurnControllableIndex < turnControllables.Count)
+            {
+                Debug.Log("Starting turn " + _currentTurnControllableIndex + " of " + turnControllables.Count);
+                turnControllables[_currentTurnControllableIndex].StartTurn();
+            }
+            else
+            {
+                Debug.LogError("End of round " + roundCount);
+                roundCount++;
+                BeginRound();
+            }
         }
 
         // Update is called once per frame
