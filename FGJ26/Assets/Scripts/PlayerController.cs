@@ -74,17 +74,31 @@ namespace FGJ26
             }
             else if (moveDirection.y > 0 && !movementFired && !transformFired)
             {
-                movementStartPosition = gameObject.transform.position;
-                movementTargetPosition = gameObject.transform.position + forwardDirection * movementStep;
-                movementFired = true;
-                transformFired = true;
+                if (IsMovementValid(forwardDirection))
+                {
+                    movementStartPosition = gameObject.transform.position;
+                    movementTargetPosition = gameObject.transform.position + forwardDirection * movementStep;
+                    movementFired = true;
+                    transformFired = true;
+                }
+                else
+                {
+                    // Debug.Log("movement blocked");
+                }
             }
             else if (moveDirection.y < 0 && !movementFired && !transformFired)
             {
-                movementStartPosition = gameObject.transform.position;
-                movementTargetPosition = gameObject.transform.position - forwardDirection * movementStep;
-                movementFired = true;
-                transformFired = true;
+                if (IsMovementValid(forwardDirection))
+                {
+                    movementStartPosition = gameObject.transform.position;
+                    movementTargetPosition = gameObject.transform.position - forwardDirection * movementStep;
+                    movementFired = true;
+                    transformFired = true;
+                }
+                else
+                {
+                    // Debug.Log("movement blocked");
+                }
             }
 
             if (rotationFired)
@@ -117,6 +131,55 @@ namespace FGJ26
             // gameObject.transform.rotation = Quaternion.Slerp(rotationStartQuaternion, rotationTargetQuaternion, Time.deltaTime * rotationSpeed);
             gameObject.transform.rotation = Quaternion.Euler(0, currentAnimationRotationY, 0);
             gameObject.transform.position = movementCurrentAnimationPosition;
+        }
+
+        private bool IsMovementValid(Vector3 direction)
+        {
+            if (direction.z > 0.5)
+            {
+                if (currentTile.tileWallNorth.type == WallType.wall)
+                {
+                    return false;
+                }
+                if (currentTile.tileWallNorth.type == WallType.door)
+                {
+                    return false;
+                }
+            }
+            if (direction.z < -0.5)
+            {
+                if (currentTile.tileWallSouth.type == WallType.wall)
+                {
+                    return false;
+                }
+                if (currentTile.tileWallSouth.type == WallType.door)
+                {
+                    return false;
+                }
+            }
+            if (direction.x > 0.5)
+            {
+                if (currentTile.tileWallEast.type == WallType.wall)
+                {
+                    return false;
+                }
+                if (currentTile.tileWallEast.type == WallType.door)
+                {
+                    return false;
+                }
+            }
+            if (direction.x < -0.5)
+            {
+                if (currentTile.tileWallWest.type == WallType.wall)
+                {
+                    return false;
+                }
+                if (currentTile.tileWallWest.type == WallType.door)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         private void GetNewForwardDirection()

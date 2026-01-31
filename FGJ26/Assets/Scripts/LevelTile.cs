@@ -22,5 +22,35 @@ namespace FGJ26
         {
 
         }
+
+        private void OnDrawGizmos()
+        {
+            float offset = 0.05f;
+            float length = 1.9f;
+            float width = 0.05f;
+            Gizmos.color = GetWallColor(tileWallNorth.type);
+            Gizmos.DrawCube(transform.position + new Vector3(0, 0.25f, 1 - offset), new Vector3(length, 0.5f, width));
+            Gizmos.color = GetWallColor(tileWallEast.type);
+            Gizmos.DrawCube(transform.position + new Vector3(1 - offset, 0.25f, 0), new Vector3(width, 0.5f, length));
+            Gizmos.color = GetWallColor(tileWallSouth.type);
+            Gizmos.DrawCube(transform.position + new Vector3(0, 0.25f, -1 + offset), new Vector3(length, 0.5f, width));
+            Gizmos.color = GetWallColor(tileWallWest.type);
+            Gizmos.DrawCube(transform.position + new Vector3(-1 + offset, 0.25f, 0), new Vector3(width, 0.5f, length));
+        }
+
+        private static Color GetWallColor(WallType wall)
+        {
+            switch (wall)
+            {
+                case WallType.open:
+                    return new Color(0f, 1f, 0f, 0.5f);
+                case WallType.wall:
+                    return new Color(1f, 0f, 0f, 0.5f);
+                case WallType.door:
+                    return new Color(0f, 0f, 1f, 0.5f);
+                default:
+                    return new Color(1f, 1f, 1f, 0.5f);
+            }
+        }
     }
 }
