@@ -8,8 +8,15 @@ using UnityEngine.InputSystem;
 namespace FGJ26
 {
 
-    public class PlayerController : MonoBehaviour
+    public enum ActionType
     {
+        move,
+        turn
+    }
+
+    public class PlayerController : MonoBehaviour, ITurnControllable
+    {
+        public static PlayerController instance;
 
         private InputAction moveAction;
 
@@ -25,6 +32,7 @@ namespace FGJ26
         private float rotationStartY = 0f;
         private float rotationTargetY = 0f;
         private float rotationPhase = 0f;
+        [SerializeField]
         private float rotationSpeed = 1.5f;
 
         private Vector3 forwardDirection = Vector3.forward;
@@ -35,6 +43,7 @@ namespace FGJ26
         private Vector3 movementStartPosition = Vector3.zero;
         private Vector3 movementTargetPosition = Vector3.zero;
         private float movementPhase = 0f;
+        [SerializeField]
         private float movementSpeed = 1.5f;
 
         private int movementStep = 2;
@@ -45,9 +54,40 @@ namespace FGJ26
 
         private LevelTile currentTile;
 
+        public int MaxActionPoints { get { return _actionPoints; } }
+        public int CurrentActionPoints
+        {
+            get { return _currentActionPoints; }
+            set
+            {
+                _currentActionPoints = value;
+            }
+        }
+
+        public int MovementCost { get { return _movementCost; } }
+
+
+        [SerializeField]
+        private int _actionPoints = 5000;
+        [SerializeField]
+        private int _movementCost = 2;
+        [SerializeField]
+        private int _turnCost = 1;
+
+        private int _currentActionPoints = 0;
+
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
+            if (instance == null)
+            {
+                instance = this;
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+            TurnControlSystem.instance.AddTurnControllable(this);
             moveAction = InputSystem.actions.FindAction("Move");
             CheckTile(gameObject.transform.position);
         }
@@ -57,22 +97,24 @@ namespace FGJ26
         {
             moveDirection = moveAction.ReadValue<Vector2>();
 
-            if (moveDirection.x > 0 && !rotationFired && !transformFired)
+            if (moveDirection.x > 0 && !rotationFired && !transformFired && HasEnoughActionPoints(ActionType.turn))
             {
                 rotationStartY = rotationTargetY;
                 rotationTargetY += 90f;
                 // forwardDirection = new Vector3();
                 rotationFired = true;
                 transformFired = true;
+                CurrentActionPoints -= _turnCost;
             }
-            else if (moveDirection.x < 0 && !rotationFired && !transformFired)
+            else if (moveDirection.x < 0 && !rotationFired && !transformFired && HasEnoughActionPoints(ActionType.turn))
             {
                 rotationStartY = rotationTargetY;
                 rotationTargetY -= 90f;
                 rotationFired = true;
                 transformFired = true;
+                CurrentActionPoints -= _turnCost;
             }
-            else if (moveDirection.y > 0 && !movementFired && !transformFired)
+            else if (moveDirection.y > 0 && !movementFired && !transformFired && HasEnoughActionPoints(ActionType.move))
             {
                 if (IsMovementValid(forwardDirection))
                 {
@@ -80,13 +122,14 @@ namespace FGJ26
                     movementTargetPosition = gameObject.transform.position + forwardDirection * movementStep;
                     movementFired = true;
                     transformFired = true;
+                    _currentActionPoints -= MovementCost;
                 }
                 else
                 {
                     // Debug.Log("movement blocked");
                 }
             }
-            else if (moveDirection.y < 0 && !movementFired && !transformFired)
+            else if (moveDirection.y < 0 && !movementFired && !transformFired && HasEnoughActionPoints(ActionType.move))
             {
                 if (IsMovementValid(forwardDirection))
                 {
@@ -94,6 +137,7 @@ namespace FGJ26
                     movementTargetPosition = gameObject.transform.position - forwardDirection * movementStep;
                     movementFired = true;
                     transformFired = true;
+                    _currentActionPoints -= MovementCost;
                 }
                 else
                 {
@@ -182,6 +226,19 @@ namespace FGJ26
             return true;
         }
 
+        private bool HasEnoughActionPoints(ActionType action)
+        {
+            switch (action)
+            {
+                case ActionType.move:
+                    return _currentActionPoints >= MovementCost;
+                case ActionType.turn:
+                    return _currentActionPoints >= _turnCost;
+                default:
+                    return false;
+            }
+        }
+
         private void GetNewForwardDirection()
         {
             Vector3 newForwardDirection = new Vector3(Mathf.Sin(currentAnimationRotationY * Mathf.Deg2Rad), 0, Mathf.Cos(currentAnimationRotationY * Mathf.Deg2Rad));
@@ -192,14 +249,24 @@ namespace FGJ26
         private void CheckTile(Vector3 position)
         {
 
-            Debug.Log("checking tile at: " + position);
+            // Debug.Log("checking tile at: " + position);
             RaycastHit hit;
             if (Physics.Raycast(position + new Vector3(0, 10, 0), new Vector3(0, -1, 0), out hit, 100f, LayerMask.GetMask("LevelTiles")))
             {
-                Debug.Log("hit: " + hit.collider.gameObject.name);
+                // Debug.Log("hit: " + hit.collider.gameObject.name);
                 currentTile = hit.collider.gameObject.GetComponent<LevelTile>();
                 Debug.Log("current tile: " + currentTile);
             }
         }
+
+        public void StartTurn()
+        {
+            _currentActionPoints = MaxActionPoints;
+            // OnTurnEnded();
+            Debug.Log("Starting player turn with AP:" + _currentActionPoints);
+        }
+
+        public event Action OnTurnEnded;
+
     }
 }
