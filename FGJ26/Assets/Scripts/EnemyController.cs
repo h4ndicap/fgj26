@@ -20,15 +20,15 @@ namespace FGJ26
         [BoxGroup("Graphics")]
         public Texture2D enemyIdle;
         [BoxGroup("Graphics")]
-        public float idleYOffset = 0.4f;
+        public float idleYOffset = 0.333f;
         [BoxGroup("Graphics")]
         public Texture2D enemyAttack;
         [BoxGroup("Graphics")]
-        public float attackYOffset = 0.472f;
+        public float attackYOffset = 0.46f;
         [BoxGroup("Graphics")]
         public Texture2D enemyDie;
         [BoxGroup("Graphics")]
-        public float dieYOffset = 0.485f;
+        public float dieYOffset = 0.489f;
         [BoxGroup("Graphics")]
         public Material enemyMaterial;
         [BoxGroup("Graphics")]
@@ -99,6 +99,8 @@ namespace FGJ26
             enemyMeshRenderer.material = Instantiate(enemyMaterial);
             _enemyMaterialInstance = enemyMeshRenderer.material;
             _enemyMaterialInstance.SetTexture("_BaseMap", enemyIdle);
+            enemyMainGraphicsObject.transform.localPosition = new Vector3(enemyMainGraphicsObject.transform.localPosition.x, idleYOffset, enemyMainGraphicsObject.transform.localPosition.z);
+            // enemyMainGraphicsObject.transform.position = new Vector3(enemyMainGraphicsObject.transform.position.x, 1000f, enemyMainGraphicsObject.transform.position.z);
 
         }
 
@@ -173,11 +175,21 @@ namespace FGJ26
                 actionDelay = idleAnimationDelay;
                 // executingAnimation = true;
                 _enemyMaterialInstance.SetTexture("_BaseMap", enemyIdle);
-                enemyMainGraphicsObject.transform.position = new Vector3(enemyMainGraphicsObject.transform.position.x, idleYOffset, enemyMainGraphicsObject.transform.position.z);
+                enemyMainGraphicsObject.transform.localPosition = new Vector3(enemyMainGraphicsObject.transform.localPosition.x, idleYOffset, enemyMainGraphicsObject.transform.localPosition.z);
                 return;
             }
 
-            if (CurrentActionPoints >= AttackActionPoints)
+            // go to idle after any action
+            if (_enemyState != EnemyState.idle)
+            {
+                _enemyState = EnemyState.idle;
+                currentAnimationSpeed = idleAnimationSpeed;
+                actionDelay = idleAnimationDelay;
+                // executingAnimation = true;
+                _enemyMaterialInstance.SetTexture("_BaseMap", enemyIdle);
+                enemyMainGraphicsObject.transform.localPosition = new Vector3(enemyMainGraphicsObject.transform.localPosition.x, idleYOffset, enemyMainGraphicsObject.transform.localPosition.z);
+            }
+            else if (CurrentActionPoints >= AttackActionPoints)
             {
                 _enemyState = EnemyState.attack;
                 currentAnimationSpeed = attackAnimationSpeed;
@@ -185,7 +197,7 @@ namespace FGJ26
                 CurrentActionPoints -= AttackActionPoints;
                 executingAnimation = true;
                 _enemyMaterialInstance.SetTexture("_BaseMap", enemyAttack);
-                enemyMainGraphicsObject.transform.position = new Vector3(enemyMainGraphicsObject.transform.position.x, attackYOffset, enemyMainGraphicsObject.transform.position.z);
+                enemyMainGraphicsObject.transform.localPosition = new Vector3(enemyMainGraphicsObject.transform.localPosition.x, attackYOffset, enemyMainGraphicsObject.transform.localPosition.z);
                 Debug.Log("EnemyController selected attack action");
             }
             else
@@ -196,7 +208,7 @@ namespace FGJ26
                 CurrentActionPoints = 0;
                 executingAnimation = true;
                 _enemyMaterialInstance.SetTexture("_BaseMap", enemyDie);
-                enemyMainGraphicsObject.transform.position = new Vector3(enemyMainGraphicsObject.transform.position.x, dieYOffset, enemyMainGraphicsObject.transform.position.z);
+                enemyMainGraphicsObject.transform.localPosition = new Vector3(enemyMainGraphicsObject.transform.localPosition.x, dieYOffset, enemyMainGraphicsObject.transform.localPosition.z);
                 Debug.Log("EnemyController selected finish turn action");
                 Debug.LogError("Not enough action points to attack");
             }

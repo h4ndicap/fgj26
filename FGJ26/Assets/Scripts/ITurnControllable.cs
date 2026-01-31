@@ -1,17 +1,21 @@
 using UnityEngine;
 using System;
 
-public interface ITurnControllable
+namespace FGJ26
 {
-    public int MaxActionPoints { get; }
-    public int MovementCost { get; }
 
-    public int CurrentActionPoints { get; set; }
+    public interface ITurnControllable
+    {
+        public int MaxActionPoints { get; }
+        public int MovementCost { get; }
 
-    public bool IsOwnTurn { get; set; }
-    void StartTurn();
-    // void OnTurnEnd();
+        public int CurrentActionPoints { get; set; }
 
-    public event Action OnTurnEnded;
-    public event Action OnActionPointsChanged;
+        public bool IsOwnTurn { get; set; }
+        void StartTurn();
+        // void OnTurnEnd();
+
+        public event Action OnTurnEnded;
+        public event Action OnActionPointsChanged;
+    }
 }

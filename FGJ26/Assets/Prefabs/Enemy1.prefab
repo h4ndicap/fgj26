@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 2910176721684217879}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
-  m_LocalPosition: {x: 0, y: 0.4, z: 0}
+  m_LocalPosition: {x: 0, y: 0.489, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -134,7 +134,7 @@ Transform:
   m_GameObject: {fileID: 3817375772408501250}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.062, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -187,11 +187,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyIdle: {fileID: 2800000, guid: 72bd3195ae381f74ba3b316679afbe37, type: 3}
-  idleYOffset: 0.4
+  idleYOffset: 0.333
   enemyAttack: {fileID: 2800000, guid: 7d3ddfe57f8fb65438e794d584d67eba, type: 3}
-  attackYOffset: 0.4
+  attackYOffset: 0.46
   enemyDie: {fileID: 2800000, guid: 69ffde4cad472004aae7ae6719875a39, type: 3}
-  dieYOffset: 0.4
+  dieYOffset: 0.489
   enemyMaterial: {fileID: 2100000, guid: 9ae7780d4a98bcd4f88700cf7f3c9cc3, type: 2}
   enemyMeshRenderer: {fileID: 6564317241654309114}
   enemyMainGraphicsObject: {fileID: 2910176721684217879}
