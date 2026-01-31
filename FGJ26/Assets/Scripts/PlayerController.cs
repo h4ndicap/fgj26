@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -11,15 +12,44 @@ namespace FGJ26
     public enum ActionType
     {
         move,
-        turn
+        turn,
+        mask
     }
 
     public class PlayerController : MonoBehaviour, ITurnControllable
     {
         public static PlayerController instance;
 
+        public MaskType maskType
+        {
+            get
+            {
+                return _maskType;
+            }
+            set
+            {
+                bool changed = value != _maskType;
+                _maskType = value;
+                if (changed)
+                {
+                    OnMaskTypeChanged?.Invoke();
+                }
+            }
+        }
+
+        private MaskType _targetMaskType = MaskType.Basic;
+        private MaskType _maskType = MaskType.Basic;
+
         private InputAction moveAction;
         private InputAction endTurnAction;
+
+        private InputAction mask1Action;
+        private InputAction mask2Action;
+        private InputAction mask3Action;
+        private InputAction mask4Action;
+        private float maskPhase = 0f;
+        [SerializeField]
+        private float maskChangeSpeed = 2f;
 
         private Vector2 moveDirection;
 
@@ -52,8 +82,22 @@ namespace FGJ26
         private int movementStep = 2;
 
         private bool movementFired = false;
+        private bool MaskFired
+        {
+            get { return _maskFired; }
+            set
+            {
+                if (value == true)
+                {
+                    Debug.Log("mask changing " + _targetMaskType);
+                    CurrentActionPoints -= _maskCost;
+                }
+                _maskFired = value;
+            }
+        }
+        private bool _maskFired = false;
 
-        private bool transformFired = false;
+        private bool inputActionInProgress = false;
 
         private LevelTile currentTile;
 
@@ -74,6 +118,7 @@ namespace FGJ26
         }
         private int _currentActionPoints = 0;
         public event Action OnActionPointsChanged;
+        public event Action OnMaskTypeChanged;
 
         public int MovementCost { get { return _movementCost; } }
 
@@ -101,6 +146,10 @@ namespace FGJ26
         private int _turnCost = 1;
 
 
+        [SerializeField]
+        private int _maskCost = 3;
+
+
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
@@ -115,6 +164,11 @@ namespace FGJ26
             TurnControlSystem.instance.AddTurnControllable(this);
             moveAction = InputSystem.actions.FindAction("Move");
             endTurnAction = InputSystem.actions.FindAction("EndTurn");
+            mask1Action = InputSystem.actions.FindAction("Mask1");
+            mask2Action = InputSystem.actions.FindAction("Mask2");
+            mask3Action = InputSystem.actions.FindAction("Mask3");
+            mask4Action = InputSystem.actions.FindAction("Mask4");
+
             CheckTile(gameObject.transform.position);
         }
 
@@ -122,44 +176,69 @@ namespace FGJ26
         void Update()
         {
             if (!IsOwnTurn) return;
+            // if (inputActionInProgress) return;
             moveDirection = moveAction.ReadValue<Vector2>();
-            bool turnEndInput = endTurnAction.triggered;
+            bool turnEndInput = endTurnAction.triggered && !inputActionInProgress;
 
 
-            if (turnEndInput && !transformFired)
+            if (turnEndInput)
             {
                 IsOwnTurn = false;
                 OnTurnEnded();
                 return;
             }
+            bool mask1Input = mask1Action.triggered && !inputActionInProgress;
+            bool mask2Input = mask2Action.triggered && !inputActionInProgress;
+            bool mask3Input = mask3Action.triggered && !inputActionInProgress;
+            bool mask4Input = mask4Action.triggered && !inputActionInProgress;
 
+            if (mask1Input && HasEnoughActionPoints(ActionType.mask))
+            {
+                _targetMaskType = MaskType.Basic;
+                MaskFired = true;
+            }
+            else if (mask2Input && HasEnoughActionPoints(ActionType.mask))
+            {
+                _targetMaskType = MaskType.Advanced;
+                MaskFired = true;
+            }
+            else if (mask3Input && HasEnoughActionPoints(ActionType.mask))
+            {
+                _targetMaskType = MaskType.Elite;
+                MaskFired = true;
+            }
+            else if (mask4Input && HasEnoughActionPoints(ActionType.mask))
+            {
+                _targetMaskType = MaskType.Basic;
+                MaskFired = true;
+            }
 
-            // Debug.Log("updateloop" + turnEndInput + rotationFired + transformFired + HasEnoughActionPoints(ActionType.turn));
-            if (moveDirection.x > 0 && !rotationFired && !transformFired && HasEnoughActionPoints(ActionType.turn))
+            // Debug.Log("updateloop" + turnEndInput + rotationFired + inputActionInProgress + HasEnoughActionPoints(ActionType.turn));
+            if (moveDirection.x > 0 && HasEnoughActionPoints(ActionType.turn) && !inputActionInProgress)
             {
                 rotationStartY = rotationTargetY;
                 rotationTargetY += 90f;
                 // forwardDirection = new Vector3();
                 rotationFired = true;
-                transformFired = true;
+                inputActionInProgress = true;
                 CurrentActionPoints -= _turnCost;
             }
-            else if (moveDirection.x < 0 && !rotationFired && !transformFired && HasEnoughActionPoints(ActionType.turn))
+            else if (moveDirection.x < 0 && HasEnoughActionPoints(ActionType.turn) && !inputActionInProgress)
             {
                 rotationStartY = rotationTargetY;
                 rotationTargetY -= 90f;
                 rotationFired = true;
-                transformFired = true;
+                inputActionInProgress = true;
                 CurrentActionPoints -= _turnCost;
             }
-            else if (moveDirection.y > 0 && !movementFired && !transformFired && HasEnoughActionPoints(ActionType.move))
+            else if (moveDirection.y > 0 && HasEnoughActionPoints(ActionType.move) && !inputActionInProgress)
             {
                 if (IsMovementValid(forwardDirection))
                 {
                     movementStartPosition = gameObject.transform.position;
                     movementTargetPosition = gameObject.transform.position + forwardDirection * movementStep;
                     movementFired = true;
-                    transformFired = true;
+                    inputActionInProgress = true;
                     CurrentActionPoints -= MovementCost;
                 }
                 else
@@ -167,14 +246,14 @@ namespace FGJ26
                     // Debug.Log("movement blocked");
                 }
             }
-            else if (moveDirection.y < 0 && !movementFired && !transformFired && HasEnoughActionPoints(ActionType.move))
+            else if (moveDirection.y < 0 && HasEnoughActionPoints(ActionType.move) && !inputActionInProgress)
             {
                 if (IsMovementValid(forwardDirection))
                 {
                     movementStartPosition = gameObject.transform.position;
                     movementTargetPosition = gameObject.transform.position - forwardDirection * movementStep;
                     movementFired = true;
-                    transformFired = true;
+                    inputActionInProgress = true;
                     CurrentActionPoints -= MovementCost;
                 }
                 else
@@ -188,8 +267,13 @@ namespace FGJ26
                 rotationPhase += Time.deltaTime * rotationSpeed;
                 currentAnimationRotationY = Mathf.LerpAngle(rotationStartY, rotationTargetY, rotationCurve.Evaluate(rotationPhase));
             }
-            else if (movementFired)
+            if (MaskFired)
             {
+                maskPhase += Time.deltaTime * maskChangeSpeed;
+            }
+            if (movementFired)
+            {
+
                 movementPhase += Time.deltaTime * movementSpeed;
                 movementCurrentAnimationPosition = Vector3.Lerp(movementStartPosition, movementTargetPosition, movementCurve.Evaluate(movementPhase));
             }
@@ -199,15 +283,23 @@ namespace FGJ26
                 rotationFired = false;
                 currentAnimationRotationY = rotationTargetY;
                 GetNewForwardDirection();
-                transformFired = false;
+                inputActionInProgress = false;
             }
             if (movementPhase >= 1f)
             {
                 movementPhase = 0f;
                 movementFired = false;
-                transformFired = false;
+                inputActionInProgress = false;
                 movementCurrentAnimationPosition = movementTargetPosition;
                 CheckTile(movementCurrentAnimationPosition);
+            }
+
+            if (maskPhase >= 1f)
+            {
+                maskPhase = 0f;
+                maskType = _targetMaskType;
+                MaskFired = false;
+                inputActionInProgress = false;
             }
 
             // gameObject.transform.rotation = Quaternion.Slerp(rotationStartQuaternion, rotationTargetQuaternion, Time.deltaTime * rotationSpeed);
@@ -273,6 +365,8 @@ namespace FGJ26
                     return CurrentActionPoints >= MovementCost;
                 case ActionType.turn:
                     return CurrentActionPoints >= _turnCost;
+                case ActionType.mask:
+                    return CurrentActionPoints >= _maskCost;
                 default:
                     return false;
             }
