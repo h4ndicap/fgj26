@@ -25,7 +25,7 @@ namespace FGJ26
 
         private void OnDrawGizmos()
         {
-            float offset = 0.05f;
+            float offset = 0.15f;
             float length = 1.9f;
             float width = 0.05f;
             Gizmos.color = GetWallColor(tileWallNorth.type);
@@ -43,7 +43,7 @@ namespace FGJ26
             switch (wall)
             {
                 case WallType.open:
-                    return new Color(0f, 1f, 0f, 0.5f);
+                    return new Color(0f, 1f, 0f, 0.1f);
                 case WallType.wall:
                     return new Color(1f, 0f, 0f, 0.5f);
                 case WallType.door:
