@@ -4,6 +4,7 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using NaughtyAttributes;
 
 
 namespace FGJ26
@@ -19,6 +20,19 @@ namespace FGJ26
     public class PlayerController : MonoBehaviour, ITurnControllable
     {
         public static PlayerController instance;
+
+        [BoxGroup("Sound")]
+        public AudioSource step1;
+        [BoxGroup("Sound")]
+        public AudioSource step2;
+        [BoxGroup("Sound")]
+        public AudioSource step3;
+        [BoxGroup("Sound")]
+        public float stepInterval = 0.5f;
+
+        [BoxGroup("Sound")]
+        public AudioSource maskChangeSource;
+
 
         public MaskType maskType
         {
@@ -78,6 +92,8 @@ namespace FGJ26
         private float movementPhase = 0f;
         [SerializeField]
         private float movementSpeed = 1.5f;
+        private float stepTimer = 0f;
+        private AudioSource nextStepSource;
 
         private int movementStep = 2;
 
@@ -90,6 +106,7 @@ namespace FGJ26
                 if (value == true)
                 {
                     Debug.Log("mask changing " + _targetMaskType);
+                    maskChangeSource.Play();
                     CurrentActionPoints -= _maskCost;
                 }
                 _maskFired = value;
@@ -240,6 +257,7 @@ namespace FGJ26
                     movementFired = true;
                     inputActionInProgress = true;
                     CurrentActionPoints -= MovementCost;
+                    nextStepSource = step1;
                 }
                 else
                 {
@@ -255,6 +273,7 @@ namespace FGJ26
                     movementFired = true;
                     inputActionInProgress = true;
                     CurrentActionPoints -= MovementCost;
+                    nextStepSource = step1;
                 }
                 else
                 {
@@ -273,7 +292,12 @@ namespace FGJ26
             }
             if (movementFired)
             {
-
+                stepTimer += Time.deltaTime;
+                if (stepTimer >= stepInterval)
+                {
+                    stepTimer = 0f;
+                    nextStepSource.Play();
+                }
                 movementPhase += Time.deltaTime * movementSpeed;
                 movementCurrentAnimationPosition = Vector3.Lerp(movementStartPosition, movementTargetPosition, movementCurve.Evaluate(movementPhase));
             }
