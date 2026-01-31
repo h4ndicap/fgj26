@@ -1,38 +1,40 @@
 using UnityEngine;
-
-public class GameManager : MonoBehaviour
+namespace FGJ26
 {
-
-    public static GameManager instance;
-
-    private PlayerController playerController;
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public class GameManager : MonoBehaviour
     {
-        if (instance == null)
+
+        public static GameManager instance;
+
+        private PlayerController playerController;
+
+        // Start is called once before the first execution of Update after the MonoBehaviour is created
+        void Start()
         {
-            instance = this;
+            if (instance == null)
+            {
+                instance = this;
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+            playerController = FindFirstObjectByType<PlayerController>();
+            Debug.Log("PlayerController found: " + playerController);
+            StartGame();
         }
-        else
+
+
+        public void StartGame()
         {
-            Destroy(gameObject);
+            Debug.Log("Game started");
+            // playerController.mainCamera.enabled = true;
         }
-        playerController = FindFirstObjectByType<PlayerController>();
-        Debug.Log("PlayerController found: " + playerController);
-        StartGame();
-    }
 
+        // Update is called once per frame
+        void Update()
+        {
 
-    public void StartGame()
-    {
-        Debug.Log("Game started");
-        // playerController.mainCamera.enabled = true;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
+        }
     }
 }

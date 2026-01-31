@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6378736937083730242}
   - component: {fileID: 4898212141419451115}
   - component: {fileID: 1668352491205361985}
+  - component: {fileID: 711221266695473145}
   m_Layer: 0
   m_Name: GameEssentials
   m_TagString: Untagged
@@ -57,3 +58,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0efbf9378da4d148a83213a24c58e0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &711221266695473145
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3767003899169947940}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e88bb9e34f72870479e37e8e88cc3cda, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  turnCount: 0
