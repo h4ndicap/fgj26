@@ -100,8 +100,13 @@ namespace FGJ26
             _enemyMaterialInstance = enemyMeshRenderer.material;
             _enemyMaterialInstance.SetTexture("_BaseMap", enemyIdle);
             enemyMainGraphicsObject.transform.localPosition = new Vector3(enemyMainGraphicsObject.transform.localPosition.x, idleYOffset, enemyMainGraphicsObject.transform.localPosition.z);
-            // enemyMainGraphicsObject.transform.position = new Vector3(enemyMainGraphicsObject.transform.position.x, 1000f, enemyMainGraphicsObject.transform.position.z);
 
+            LevelTile tile = LevelTile.GetTileAtPosition(gameObject.transform.position);
+            if (tile != null)
+            {
+                tile.Occupy();
+            }
+            // enemyMainGraphicsObject.transform.position = new Vector3(enemyMainGraphicsObject.transform.position.x, 1000f, enemyMainGraphicsObject.transform.position.z);
         }
 
         public void StartTurn()

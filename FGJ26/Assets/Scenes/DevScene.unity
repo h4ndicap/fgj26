@@ -2512,6 +2512,10 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 895182447894142828, guid: 5fb3e7dc6725cf64eacf546727177dec, type: 3}
+      propertyPath: _actionPoints
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 895182447894142828, guid: 5fb3e7dc6725cf64eacf546727177dec, type: 3}
       propertyPath: movementSpeed
       value: 2
       objectReference: {fileID: 0}
@@ -2630,6 +2634,10 @@ PrefabInstance:
     - target: {fileID: 8090237987791491156, guid: f8da2a03dad4be945befefe4c8a34df9, type: 3}
       propertyPath: m_Name
       value: Enemy1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8090237987791491156, guid: f8da2a03dad4be945befefe4c8a34df9, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

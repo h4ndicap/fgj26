@@ -11,6 +11,16 @@ namespace FGJ26
         [SerializeField] public TileWall tileWallSouth;
         [SerializeField] public TileWall tileWallWest;
 
+        [SerializeField] public bool occupied = false;
+        public void Occupy()
+        {
+            occupied = true;
+        }
+        public void Vacate()
+        {
+            occupied = false;
+        }
+
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
@@ -51,6 +61,18 @@ namespace FGJ26
                 default:
                     return new Color(1f, 1f, 1f, 0.5f);
             }
+        }
+
+
+
+        public static LevelTile GetTileAtPosition(Vector3 position)
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(position + new Vector3(0, 10, 0), new Vector3(0, -1, 0), out hit, 100f, LayerMask.GetMask("LevelTiles")))
+            {
+                return hit.collider.gameObject.GetComponent<LevelTile>();
+            }
+            return null;
         }
     }
 }

@@ -14,6 +14,13 @@ namespace FGJ26
         mask
     }
 
+    public enum MovementValidity
+    {
+        valid,
+        blocked,
+        occupied
+    }
+
     public class PlayerController : MonoBehaviour, ITurnControllable
     {
         public static PlayerController instance;
@@ -198,6 +205,7 @@ namespace FGJ26
             if (turnEndInput)
             {
                 IsOwnTurn = false;
+                CurrentActionPoints = 0;
                 OnTurnEnded();
                 return;
             }
@@ -247,7 +255,8 @@ namespace FGJ26
             }
             else if (moveDirection.y > 0 && HasEnoughActionPoints(ActionType.move) && !inputActionInProgress)
             {
-                if (IsMovementValid(forwardDirection))
+                MovementValidity validity;
+                if (IsMovementValid(forwardDirection, out validity))
                 {
                     movementStartPosition = gameObject.transform.position;
                     movementTargetPosition = gameObject.transform.position + forwardDirection * movementStep;
@@ -258,12 +267,13 @@ namespace FGJ26
                 }
                 else
                 {
-                    // Debug.Log("movement blocked");
+                    Debug.Log("movement blocked: " + validity);
                 }
             }
             else if (moveDirection.y < 0 && HasEnoughActionPoints(ActionType.move) && !inputActionInProgress)
             {
-                if (IsMovementValid(forwardDirection))
+                MovementValidity validity;
+                if (IsMovementValid(-forwardDirection, out validity))
                 {
                     movementStartPosition = gameObject.transform.position;
                     movementTargetPosition = gameObject.transform.position - forwardDirection * movementStep;
@@ -274,7 +284,7 @@ namespace FGJ26
                 }
                 else
                 {
-                    // Debug.Log("movement blocked");
+                    Debug.Log("movement blocked: " + validity);
                 }
             }
 
@@ -328,16 +338,44 @@ namespace FGJ26
             gameObject.transform.position = movementCurrentAnimationPosition;
         }
 
-        private bool IsMovementValid(Vector3 direction)
+        Vector3 lastTileTestPosition = Vector3.zero;
+        void OnDrawGizmos()
         {
+            if (lastTileTestPosition != Vector3.zero)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawSphere(lastTileTestPosition, 0.1f);
+                Gizmos.DrawRay(lastTileTestPosition + new Vector3(0, 1, 0), new Vector3(0, -1000, 0));
+            }
+        }
+
+        private bool IsMovementValid(Vector3 direction, out MovementValidity validity)
+        {
+            validity = MovementValidity.valid;
+            Vector3 targetPosition = gameObject.transform.position + direction * 2f;
+            LevelTile tile = LevelTile.GetTileAtPosition(targetPosition);
+            if (tile == null)
+            {
+                Debug.Log("No tile at position: " + targetPosition);
+                validity = MovementValidity.blocked;
+                return false;
+            }
+            if (tile.occupied)
+            {
+                Debug.Log("Tile is occupied: " + targetPosition);
+                validity = MovementValidity.occupied;
+                return false;
+            }
             if (direction.z > 0.5)
             {
                 if (currentTile.tileWallNorth.type == WallType.wall)
                 {
+                    validity = MovementValidity.blocked;
                     return false;
                 }
                 if (currentTile.tileWallNorth.type == WallType.door)
                 {
+                    validity = MovementValidity.blocked;
                     return false;
                 }
             }
@@ -345,10 +383,12 @@ namespace FGJ26
             {
                 if (currentTile.tileWallSouth.type == WallType.wall)
                 {
+                    validity = MovementValidity.blocked;
                     return false;
                 }
                 if (currentTile.tileWallSouth.type == WallType.door)
                 {
+                    validity = MovementValidity.blocked;
                     return false;
                 }
             }
@@ -356,10 +396,12 @@ namespace FGJ26
             {
                 if (currentTile.tileWallEast.type == WallType.wall)
                 {
+                    validity = MovementValidity.blocked;
                     return false;
                 }
                 if (currentTile.tileWallEast.type == WallType.door)
                 {
+                    validity = MovementValidity.blocked;
                     return false;
                 }
             }
@@ -367,13 +409,16 @@ namespace FGJ26
             {
                 if (currentTile.tileWallWest.type == WallType.wall)
                 {
+                    validity = MovementValidity.blocked;
                     return false;
                 }
                 if (currentTile.tileWallWest.type == WallType.door)
                 {
+                    validity = MovementValidity.blocked;
                     return false;
                 }
             }
+            validity = MovementValidity.valid;
             return true;
         }
 
