@@ -36,8 +36,20 @@ namespace FGJ26
         [BoxGroup("Graphics")]
         public GameObject enemyMainGraphicsObject;
 
+        [BoxGroup("Graphics")]
+        public AnimationCurve attackCurve;
+
+        [BoxGroup("Graphics")]
+        public float attackHitPhase = 0.25f;
+
+        private bool attackHit = false;
+
+        private float attackCurvePhase = 0f;
+
         private Material _enemyMaterialInstance;
         public GameObject enemyPivot;
+
+        public Vector3 pivotBasePosition = Vector3.zero;
         public bool IsOwnTurn
         {
             get { return _isOwnTurn; }
@@ -82,6 +94,14 @@ namespace FGJ26
         public float finishTurnAnimationDelay = 2f;
         public float finishTurnAnimationSpeed = 1f;
 
+        [SerializeField]
+        private int _attackDamage = 1;
+        public int AttackDamage
+        {
+            get { return _attackDamage; }
+            set { _attackDamage = value; }
+        }
+
         public float idleAnimationDelay = 1f;
         public float idleAnimationSpeed = 1f;
 
@@ -100,6 +120,7 @@ namespace FGJ26
             _enemyMaterialInstance = enemyMeshRenderer.material;
             _enemyMaterialInstance.SetTexture("_BaseMap", enemyIdle);
             enemyMainGraphicsObject.transform.localPosition = new Vector3(enemyMainGraphicsObject.transform.localPosition.x, idleYOffset, enemyMainGraphicsObject.transform.localPosition.z);
+            pivotBasePosition = enemyPivot.transform.position;
 
             LevelTile tile = LevelTile.GetTileAtPosition(gameObject.transform.position);
             if (tile != null)
@@ -151,10 +172,32 @@ namespace FGJ26
                 }
                 if (executingAnimation)
                 {
+                    if (!attackHit)
+                    {
+                        if (attackCurvePhase >= attackHitPhase)
+                        {
+                            attackHit = true;
+                            Debug.Log("EnemyController hit player");
+                            // PlayerController.instance.Health -= AttackDamage;
+                            PlayerController.instance.TakeDamage(AttackDamage);
+                        }
+                    }
                     actionDelayTimer += Time.deltaTime;
+
+                    if (_enemyState == EnemyState.attack)
+                    {
+                        attackCurvePhase += Time.deltaTime / attackAnimationDelay;
+                        float attackCurveValue = attackCurve.Evaluate(attackCurvePhase);
+                        Vector3 newPosition = Vector3.Lerp(pivotBasePosition, PlayerController.instance.transform.position, attackCurveValue);
+                        enemyPivot.transform.position = newPosition;
+                    }
+
                     if (actionDelayTimer >= actionDelay)
                     {
                         executingAnimation = false;
+                        attackCurvePhase = 0f;
+                        enemyPivot.transform.position = pivotBasePosition;
+                        attackHit = false;
                         if (_enemyState == EnemyState.attack)
                         {
                             Debug.Log("EnemyController finished attack action");

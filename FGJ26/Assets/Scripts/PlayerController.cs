@@ -155,6 +155,11 @@ namespace FGJ26
             }
         }
 
+        public float damageRecoilDegrees = 15f;
+        public AnimationCurve damageRecoilCurve;
+        private float damageRecoilPhase = 0f;
+        private float damageRecoilMagnitude = 0f;
+
 
         private bool _isOwnTurn = false;
 
@@ -170,6 +175,32 @@ namespace FGJ26
         [SerializeField]
         private int _maskCost = 3;
 
+        [SerializeField]
+        private int _health = 10;
+        public int Health
+        {
+            get { return _health; }
+            set
+            {
+                _health = value;
+                OnHealthChanged?.Invoke();
+                if (_health <= 0)
+                {
+                    OnPlayerDeath?.Invoke();
+                }
+            }
+        }
+
+        public void TakeDamage(int damage)
+        {
+            Health -= damage;
+            Debug.LogError("OUCH " + damage + " -> " + Health);
+            damageRecoilPhase = 1f;
+            damageRecoilMagnitude = UnityEngine.Random.Range(-0.5f, 1.5f);
+        }
+
+        public event Action OnHealthChanged;
+        public event Action OnPlayerDeath;
 
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
@@ -196,6 +227,17 @@ namespace FGJ26
         // Update is called once per frame
         void Update()
         {
+            if (damageRecoilPhase > 0f)
+            {
+                damageRecoilPhase -= Time.deltaTime;
+                // currentAnimationRotationY = Mathf.LerpAngle(currentAnimationRotationY, currentAnimationRotationY + damageRecoilDegrees, damageRecoilCurve.Evaluate(damageRecoilPhase));
+                float recoilDegrees = Mathf.Lerp(0f, damageRecoilDegrees * damageRecoilMagnitude, damageRecoilCurve.Evaluate(damageRecoilPhase));
+                mainCamera.gameObject.transform.rotation = Quaternion.Euler(recoilDegrees, 0, 0);
+            }
+            else
+            {
+                mainCamera.gameObject.transform.rotation = Quaternion.Euler(0, 0, 0);
+            }
             if (!IsOwnTurn) return;
             // if (inputActionInProgress) return;
             moveDirection = moveAction.ReadValue<Vector2>();

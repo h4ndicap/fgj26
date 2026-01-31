@@ -195,7 +195,42 @@ MonoBehaviour:
   enemyMaterial: {fileID: 2100000, guid: 9ae7780d4a98bcd4f88700cf7f3c9cc3, type: 2}
   enemyMeshRenderer: {fileID: 6564317241654309114}
   enemyMainGraphicsObject: {fileID: 2910176721684217879}
+  attackCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.09082833
+      value: 0.79526067
+      inSlope: 0.13805233
+      outSlope: 0.13805233
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.08907818
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  attackHitPhase: 0.07
   enemyPivot: {fileID: 3817375772408501250}
+  pivotBasePosition: {x: 0, y: 0, z: 0}
   AttackActionPoints: 1
   currentAnimationSpeed: 1
   actionDelay: 1
@@ -203,6 +238,7 @@ MonoBehaviour:
   attackAnimationSpeed: 25
   finishTurnAnimationDelay: 2
   finishTurnAnimationSpeed: 1
+  _attackDamage: 1
   idleAnimationDelay: 1
   idleAnimationSpeed: 1
   executingAnimation: 0

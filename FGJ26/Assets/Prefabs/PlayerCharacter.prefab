@@ -242,10 +242,45 @@ MonoBehaviour:
     m_RotationOrder: 4
   rotationSpeed: 1.5
   movementSpeed: 1.5
+  damageRecoilDegrees: 15
+  damageRecoilCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.80851066
+      value: 0.6238095
+      inSlope: 2.3198717
+      outSlope: 2.3198717
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.12440191
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -17.990852
+      outSlope: -17.990852
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.13131307
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   _actionPoints: 5
   _movementCost: 2
   _turnCost: 1
   _maskCost: 3
+  _health: 10
 --- !u!1 &1739618226560727237
 GameObject:
   m_ObjectHideFlags: 0
